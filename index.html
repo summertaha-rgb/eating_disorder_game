@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirror Within - Interactive Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .stat-transition { transition: width 0.5s ease-in-out; }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <div id="game-container" class="max-w-2xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        <!-- App will be injected here by JavaScript -->
+    </div>
+
+    <script>
+        const scenarios = [
+            {
+                title: "The Mirror",
+                location: "Bedroom - 7:15 AM",
+                context: "Lina stares at her reflection, pulling at her shirt. 'You look bigger today,' the voice whispers. She's already late for school.",
+                choices: [
+                    {
+                        text: "Skip breakfast and rush out",
+                        thoughts: "Saved some calories. Maybe her family won't notice if I act like I'm in a hurry.",
+                        impact: { mental: -10, physical: -15, isolation: +5 },
+                        insight: "Skipping breakfast puts the body in a state of stress. It can lead to 'brain fog' and increased irritability. Long-term risks include nutrient deficiencies and a higher likelihood of binge eating later."
+                    },
+                    {
+                        text: "Force herself to eat black coffee and an apple",
+                        thoughts: "104 calories. I'll have to walk home instead of taking the bus to burn this off.",
+                        impact: { mental: -15, physical: -5, isolation: 0 },
+                        insight: "While an apple provides fiber, a lack of protein and healthy fats leaves the body seeking energy, often leading to intense 'food noise' where the brain becomes obsessed with eating."
+                    },
+                    {
+                        text: "Pause and tell her mom she’s not okay",
+                        thoughts: "It's terrifying to say it out loud, but she knows it'll help her see a different perspective.",
+                        impact: { mental: +15, physical: +10, isolation: -15 },
+                        insight: "Reaching out for support early in the day can reduce the emotional burden of an eating disorder and help reframe nutrition as fuel rather than a threat."
+                    }
+                ]
+            },
+            {
+                title: "The Cafeteria",
+                location: "School - 12:30 PM",
+                context: "Laughter fills the table, but Lina feels distant. 'They're all eating normally... why can't you?'",
+                choices: [
+                    {
+                        text: "Say she already ate",
+                        thoughts: "I'm so jealous they can eat normally and look healthy. I don't have the energy to laugh with them.",
+                        impact: { mental: -10, physical: -20, isolation: +20 },
+                        insight: "When the body enters 'survival mode' due to lack of fuel, the brain prioritizes basic functions over social interaction, leading to increased isolation."
+                    },
+                    {
+                        text: "Eat slowly while comparing herself",
+                        thoughts: "I'll go for the lowest calorie option. If I pick at it, maybe they won't notice.",
+                        impact: { mental: -20, physical: -5, isolation: +5 },
+                        insight: "Signs a friend might be struggling include ritualistic eating habits, social withdrawal, and frequently disappearing after meals."
+                    },
+                    {
+                        text: "Open up to a friend",
+                        thoughts: "It's a huge step. I'm scared, but the secret feels slightly lighter now.",
+                        impact: { mental: +20, physical: 0, isolation: -25 },
+                        insight: "When a friend opens up, listen without judgment. Avoid commenting on their appearance. Encourage professional help and be a safe space."
+                    }
+                ]
+            },
+            {
+                title: "The Scroll",
+                location: "Bedroom - 10:45 PM",
+                context: "Lina lies in bed, scrolling. 'What I eat in a day' videos flood her feed. 'If you tried harder, you could look like that.'",
+                choices: [
+                    {
+                        text: "Keep scrolling and save posts",
+                        thoughts: "I'll save these for inspiration to look back at, idolizing celebrities to copy.",
+                        impact: { mental: -25, physical: 0, isolation: +10 },
+                        insight: "Social media algorithms often create 'echo chambers' of disordered content, promoting misinformation and amplifying body dysmorphia."
+                    },
+                    {
+                        text: "Close the app",
+                        thoughts: "I feel stressed and hopeless. I'm already planning tomorrow to fit the videos.",
+                        impact: { mental: -10, physical: 0, isolation: 0 },
+                        insight: "Stress and hopelessness often fuel more rigid planning as a coping mechanism. Detoxing is good, but the internal dialogue needs support too."
+                    },
+                    {
+                        text: "Look up recovery content",
+                        thoughts: "I'm trying to change my mindset. Rationally I know it's right.",
+                        impact: { mental: +15, physical: 0, isolation: -5 },
+                        insight: "Actively seeking recovery-oriented content helps rewire the brain toward 'body neutrality'—valuing your body for what it does, not just how it looks."
+                    }
+                ]
+            },
+            {
+                title: "The Breaking Point",
+                location: "Kitchen - 11:30 PM",
+                context: "The house is quiet, but the kitchen feels loud. The pressure of the day has reached a boiling point.",
+                choices: [
+                    {
+                        text: "Eat everything in sight, quickly",
+                        thoughts: "I'll start fresh tomorrow. I feel sick and my stomach hurts.",
+                        impact: { mental: -30, physical: -10, isolation: +10 },
+                        insight: "Binge Eating involves eating rapidly to discomfort, often followed by intense self-hate. Purging can take many forms and is extremely dangerous."
+                    },
+                    {
+                        text: "Walk away and distract herself",
+                        thoughts: "'Skip dinner, wake up thinner.' I worked too hard today to spoil it now.",
+                        impact: { mental: -15, physical: -15, isolation: +5 },
+                        insight: "Mantras like 'skip dinner, wake up thinner' are dangerous. They glamorize starvation and prevent the body from receiving essential nutrients for the heart."
+                    },
+                    {
+                        text: "Call someone",
+                        thoughts: "I hope they can calm me down. I need a real conversation.",
+                        impact: { mental: +20, physical: 0, isolation: -20 },
+                        insight: "Reaching out during a crisis interrupts the neurological loop of disordered thoughts. Connection is a powerful tool against the secrecy of EDs."
+                    }
+                ]
+            },
+            {
+                title: "The Turning Point",
+                location: "Bedroom - Midnight",
+                context: "Lina sits on her bed, overwhelmed. 'You can't keep doing this,' she realizes.",
+                choices: [
+                    {
+                        text: "Tell a friend",
+                        thoughts: "I'm going to reach out. I need support to get through this.",
+                        impact: { mental: +15, physical: 0, isolation: -20 },
+                        insight: "Social support is a primary predictor of recovery. Discussing resources with friends can help bridge the gap to professional treatment."
+                    },
+                    {
+                        text: "Keep everything inside",
+                        thoughts: "I'll just try harder on my own. No one needs to know.",
+                        impact: { mental: -20, physical: -20, isolation: +30 },
+                        insight: "Eating disorders have high mortality rates. Silence allows physical damage to progress unnoticed, making long-term recovery harder."
+                    },
+                    {
+                        text: "Ask for professional help",
+                        thoughts: "I need a doctor. I need a therapist. I need a way out.",
+                        impact: { mental: +25, physical: +10, isolation: -10 },
+                        insight: "Professional treatment involves a team approach. Success rates improve significantly when specialized care is started early."
+                    }
+                ]
+            }
+        ];
+
+        let currentStep = 'start';
+        let scenarioIndex = 0;
+        let stats = { mental: 50, physical: 50, isolation: 50 };
+        let showInsight = false;
+        let lastChoice = null;
+
+        function render() {
+            const container = document.getElementById('game-container');
+            
+            if (currentStep === 'start') {
+                container.innerHTML = `
+                    <div class="p-8 text-center space-y-6 fade-in">
+                        <div class="inline-block p-4 bg-indigo-50 rounded-full mb-4">
+                            <i data-lucide="activity" class="w-12 h-12 text-indigo-600"></i>
+                        </div>
+                        <h1 class="text-4xl font-bold text-slate-900 tracking-tight">Mirror Within</h1>
+                        <p class="text-slate-600 leading-relaxed text-lg italic">
+                            "Experience the silent struggle. Influence Lina's journey through a day shaped by an eating disorder."
+                        </p>
+                        <div class="bg-blue-50 p-4 rounded-lg text-sm text-blue-800 flex gap-3 text-left">
+                            <i data-lucide="info" class="w-6 h-6 flex-shrink-0"></i>
+                            <p>This game contains themes of eating disorders and mental health struggles. It is intended for awareness and empathy building.</p>
+                        </div>
+                        <button onclick="startGame()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] shadow-lg">
+                            Start Lina's Day
+                        </button>
+                    </div>
+                `;
+            } else if (currentStep === 'playing') {
+                if (!showInsight) {
+                    const scenario = scenarios[scenarioIndex];
+                    container.innerHTML = `
+                        <div class="bg-slate-900 p-4 text-white flex justify-between items-center">
+                            <div class="flex gap-4">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="heart" class="w-5 h-5 ${stats.mental < 30 ? 'text-red-400' : 'text-pink-400'}"></i>
+                                    <div class="w-20 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-pink-400 stat-transition" style="width: ${stats.mental}%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="battery" class="w-5 h-5 ${stats.physical < 30 ? 'text-red-400' : 'text-yellow-400'}"></i>
+                                    <div class="w-20 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-yellow-400 stat-transition" style="width: ${stats.physical}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-xs uppercase opacity-70">Scenario ${scenarioIndex + 1}/5</div>
+                        </div>
+                        <div class="p-8 fade-in">
+                            <div class="mb-2 flex items-center gap-2 text-indigo-600 font-semibold uppercase text-xs tracking-tighter">
+                                <span class="w-8 h-[1px] bg-indigo-600"></span>
+                                ${scenario.location}
+                            </div>
+                            <h2 class="text-2xl font-bold text-slate-900 mb-4">${scenario.title}</h2>
+                            <p class="text-lg text-slate-700 leading-relaxed mb-8 bg-slate-50 p-6 rounded-xl border-l-4 border-indigo-500">
+                                ${scenario.context}
+                            </p>
+                            <div class="space-y-3">
+                                ${scenario.choices.map((c, i) => `
+                                    <button onclick="makeChoice(${i})" class="w-full p-4 text-left border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 rounded-xl transition-all group flex justify-between items-center">
+                                        <span class="font-medium text-slate-700">${c.text}</span>
+                                        <i data-lucide="arrow-right" class="w-4 h-4 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                         <div class="bg-slate-900 p-4 text-white flex justify-between items-center">
+                            <div class="flex gap-4">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="heart" class="w-5 h-5 text-pink-400"></i>
+                                    <div class="w-20 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-pink-400 stat-transition" style="width: ${stats.mental}%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="battery" class="w-5 h-5 text-yellow-400"></i>
+                                    <div class="w-20 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-yellow-400 stat-transition" style="width: ${stats.physical}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-8 fade-in">
+                            <div class="bg-indigo-900 text-white p-6 rounded-xl shadow-lg mb-6">
+                                <div class="flex items-center gap-2 mb-3 text-indigo-300 font-bold uppercase text-xs">
+                                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    Lina's Thoughts
+                                </div>
+                                <p class="text-xl italic font-serif leading-relaxed">"${lastChoice.thoughts}"</p>
+                            </div>
+                            <div class="bg-white border-2 border-blue-100 rounded-xl overflow-hidden shadow-sm">
+                                <div class="bg-blue-50 px-4 py-2 border-b border-blue-100 flex items-center gap-2 text-blue-700 font-bold text-sm">
+                                    <i data-lucide="info" class="w-4 h-4"></i>
+                                    Information for you
+                                </div>
+                                <div class="p-5 text-slate-700 leading-relaxed text-sm">
+                                    ${lastChoice.insight}
+                                </div>
+                            </div>
+                            <button onclick="nextStep()" class="mt-8 w-full py-4 bg-slate-900 hover:bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2">
+                                Continue Journey <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+            } else if (currentStep === 'ending') {
+                const ending = getEnding();
+                container.innerHTML = `
+                    <div class="p-8 text-center space-y-6 fade-in">
+                        <h2 class="text-3xl font-bold text-slate-900">The Day Ends</h2>
+                        <div class="p-8 rounded-2xl border-2 text-left ${ending.color}">
+                            <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                                ${ending.title}
+                            </h3>
+                            <p class="leading-relaxed text-lg">${ending.desc}</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 py-6 border-y border-slate-100">
+                            <div>
+                                <div class="text-2xl font-bold text-pink-600">${stats.mental}%</div>
+                                <div class="text-xs uppercase text-slate-500">Mental</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-yellow-600">${stats.physical}%</div>
+                                <div class="text-xs uppercase text-slate-500">Physical</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-indigo-600">${stats.isolation}%</div>
+                                <div class="text-xs uppercase text-slate-500">Isolation</div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-500 italic">“Mirror Within” is designed to build empathy. If you are struggling, please reach out for professional help.</p>
+                        <button onclick="resetGame()" class="inline-flex items-center gap-2 text-indigo-600 font-bold hover:underline">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Restart Experience
+                        </button>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function startGame() {
+            currentStep = 'playing';
+            render();
+        }
+
+        function makeChoice(idx) {
+            const choice = scenarios[scenarioIndex].choices[idx];
+            lastChoice = choice;
+            stats.mental = Math.max(0, Math.min(100, stats.mental + choice.impact.mental));
+            stats.physical = Math.max(0, Math.min(100, stats.physical + choice.impact.physical));
+            stats.isolation = Math.max(0, Math.min(100, stats.isolation + choice.impact.isolation));
+            showInsight = true;
+            render();
+        }
+
+        function nextStep() {
+            showInsight = false;
+            if (scenarioIndex < scenarios.length - 1) {
+                scenarioIndex++;
+            } else {
+                currentStep = 'ending';
+            }
+            render();
+        }
+
+        function getEnding() {
+            if (stats.mental > 60 && stats.isolation < 40) {
+                return {
+                    title: "Recovery Ending",
+                    desc: "Lina begins to open up and seek help. She realizes her worth isn't tied to a number, and with support, she starts to see a girl who deserves to be happy.",
+                    color: "bg-green-100 border-green-500 text-green-800"
+                };
+            } else if (stats.isolation > 60 || stats.physical < 30) {
+                return {
+                    title: "Crisis Ending",
+                    desc: "Lina's health has reached a critical decline. The isolation she feels is overwhelming. Professional intervention is urgently needed to break this dangerous path.",
+                    color: "bg-red-100 border-red-500 text-red-800"
+                };
+            } else {
+                return {
+                    title: "Loop Ending",
+                    desc: "Lina continues the cycle, feeling stuck in the grey area. She is surviving, but the struggle continues in silence. The loop waits to be broken.",
+                    color: "bg-yellow-100 border-yellow-500 text-yellow-800"
+                };
+            }
+        }
+
+        function resetGame() {
+            currentStep = 'start';
+            scenarioIndex = 0;
+            stats = { mental: 50, physical: 50, isolation: 50 };
+            showInsight = false;
+            render();
+        }
+
+        // Initialize
+        window.onload = render;
+    </script>
+</body>
+</html>
